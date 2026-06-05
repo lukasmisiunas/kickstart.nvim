@@ -127,6 +127,10 @@ do
   -- Enable break indent
   vim.o.breakindent = true
 
+  -- Wrap long lines at word boundaries (e.g. spaces) instead of mid-word.
+  -- Requires 'wrap' (on by default); 'linebreak' is what avoids splitting words.
+  vim.o.linebreak = true
+
   -- Enable undo/redo changes even after closing and reopening a file
   vim.o.undofile = true
 
