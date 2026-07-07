@@ -209,6 +209,12 @@ do
 
   vim.keymap.set('n', '<leader>q', vim.diagnostic.setloclist, { desc = 'Open diagnostic [Q]uickfix list' })
 
+  -- Apply all auto-fixable ESLint issues in the current buffer.
+  vim.keymap.set('n', '<leader>cf', '<cmd>LspEslintFixAll<CR>', { desc = '[C]ode [F]ix (ESLint)' })
+
+  -- Reload the Neovim config (re-source init.lua) without restarting.
+  vim.keymap.set('n', '<leader>R', '<cmd>source $MYVIMRC<CR>', { desc = '[R]eload config' })
+
   -- Exit terminal mode in the builtin terminal with a shortcut that is a bit easier
   -- for people to discover. Otherwise, you normally need to press <C-\><C-n>, which
   -- is not what someone will guess without a bit more experience.
@@ -394,6 +400,9 @@ do
   -- change the command under that to load whatever the name of that colorscheme is.
   --
   -- If you want to see what colorschemes are already installed, you can use `:Telescope colorscheme`.
+  -- Enable 24-bit RGB color; required for undercurl/guisp (diagnostic underlines)
+  vim.opt.termguicolors = true
+
   vim.pack.add { gh 'Mofiqul/dracula.nvim' }
   require('dracula').setup {
     italic_comment = false,
@@ -702,6 +711,8 @@ do
     --
     -- But for many setups, the LSP (`ts_ls`) will work just fine
     ts_ls = {},
+    cssls = {},
+    eslint = {},
 
     stylua = {}, -- Used to format Lua code
 
@@ -789,6 +800,7 @@ do
         typescriptreact = true,
         javascript = true,
         javascriptreact = true,
+        css = true,
       }
       if enabled_filetypes[vim.bo[bufnr].filetype] then
         return { timeout_ms = 500 }
@@ -812,6 +824,7 @@ do
       typescriptreact = { 'prettierd', 'prettier', stop_after_first = true },
       json = { 'prettierd', 'prettier', stop_after_first = true },
       jsonc = { 'prettierd', 'prettier', stop_after_first = true },
+      css = { 'prettierd', 'prettier', stop_after_first = true },
     },
   }
 
@@ -878,6 +891,9 @@ do
       -- By default, you may press `<c-space>` to show the documentation.
       -- Optionally, set `auto_show = true` to show the documentation after a delay.
       documentation = { auto_show = false, auto_show_delay_ms = 500 },
+
+      -- Don't append call parens `()` when accepting a function completion.
+      accept = { auto_brackets = { enabled = false } },
     },
 
     sources = {
@@ -914,7 +930,8 @@ do
   vim.pack.add { { src = gh 'nvim-treesitter/nvim-treesitter', version = 'main' } }
 
   -- Ensure basic parsers are installed
-  local parsers = { 'bash', 'c', 'diff', 'html', 'lua', 'luadoc', 'markdown', 'markdown_inline', 'query', 'vim', 'vimdoc', 'javascript', 'typescript', 'tsx', 'json' }
+  local parsers =
+    { 'bash', 'c', 'diff', 'html', 'lua', 'luadoc', 'markdown', 'markdown_inline', 'query', 'vim', 'vimdoc', 'javascript', 'typescript', 'tsx', 'json' }
   require('nvim-treesitter').install(parsers)
 
   ---@param buf integer
@@ -992,3 +1009,18 @@ end
 
 -- The line beneath this is called `modeline`. See `:help modeline`
 -- vim: ts=2 sts=2 sw=2 et
+
+local notes_opts = { dir = '~/notes' }
+require('notes').setup(notes_opts)
+
+-- TEMPORARY: notes dev helper. Uncomment the call below while working on the
+-- local `notes` plugin to get a `:NotesReload` command (drops the module from
+-- the cache and re-runs setup, no restart needed). Leave it commented otherwise.
+local function notes_dev_reload()
+  vim.api.nvim_create_user_command('NotesReload', function()
+    package.loaded.notes = nil
+    require('notes').setup(notes_opts)
+    vim.notify 'Reloaded notes'
+  end, { desc = 'Reload the local notes plugin' })
+end
+notes_dev_reload()
