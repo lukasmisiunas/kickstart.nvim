@@ -124,6 +124,13 @@ do
   --  See `:help 'clipboard'`
   vim.schedule(function() vim.o.clipboard = 'unnamedplus' end)
 
+  -- Default indentation: 2 spaces. guess-indent overrides these per-file when
+  -- it detects a clear style; this is the fallback for new/ambiguous files.
+  vim.o.expandtab = true
+  vim.o.tabstop = 2
+  vim.o.softtabstop = 2
+  vim.o.shiftwidth = 2
+
   -- Enable break indent
   vim.o.breakindent = true
 
@@ -713,6 +720,7 @@ do
     ts_ls = {},
     cssls = {},
     eslint = {},
+    astro = {}, -- Astro LSP (.astro files)
 
     stylua = {}, -- Used to format Lua code
 
@@ -769,9 +777,13 @@ do
   --
   -- You can press `g?` for help in this menu.
   local ensure_installed = vim.tbl_keys(servers or {})
+  -- The Mason registry's default astro-language-server version is broken (points at an
+  -- unpublished npm release), so drop the alias-resolved entry and pin it explicitly below.
+  ensure_installed = vim.tbl_filter(function(name) return name ~= 'astro' end, ensure_installed)
   vim.list_extend(ensure_installed, {
     -- You can add other tools here that you want Mason to install
     'prettierd',
+    { 'astro-language-server', version = '2.16.10' },
   })
 
   require('mason-tool-installer').setup { ensure_installed = ensure_installed }
@@ -927,11 +939,14 @@ do
   --  See `:help nvim-treesitter-intro`
 
   -- NOTE: You can also specify a branch or a specific commit
+  -- Detect .astro files (not recognized by Neovim core) so the LSP and parser attach
+  vim.filetype.add { extension = { astro = 'astro' } }
+
   vim.pack.add { { src = gh 'nvim-treesitter/nvim-treesitter', version = 'main' } }
 
   -- Ensure basic parsers are installed
   local parsers =
-    { 'bash', 'c', 'diff', 'html', 'lua', 'luadoc', 'markdown', 'markdown_inline', 'query', 'vim', 'vimdoc', 'javascript', 'typescript', 'tsx', 'json' }
+    { 'bash', 'c', 'diff', 'html', 'lua', 'luadoc', 'markdown', 'markdown_inline', 'query', 'vim', 'vimdoc', 'javascript', 'typescript', 'tsx', 'json', 'astro' }
   require('nvim-treesitter').install(parsers)
 
   ---@param buf integer
