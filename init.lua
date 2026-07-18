@@ -1027,19 +1027,19 @@ end
 -- The line beneath this is called `modeline`. See `:help modeline`
 -- vim: ts=2 sts=2 sw=2 et
 
-local notes_opts = { dir = '~/notes' }
-require('notes').setup(notes_opts)
+-- local notes_opts = { dir = '~/notes' }
+-- require('notes').setup(notes_opts)
 
 require('cheatsheet').setup {}
 
 -- TEMPORARY: notes dev helper. Uncomment the call below while working on the
 -- local `notes` plugin to get a `:NotesReload` command (drops the module from
 -- the cache and re-runs setup, no restart needed). Leave it commented otherwise.
-local function notes_dev_reload()
-  vim.api.nvim_create_user_command('NotesReload', function()
-    package.loaded.notes = nil
-    require('notes').setup(notes_opts)
-    vim.notify 'Reloaded notes'
-  end, { desc = 'Reload the local notes plugin' })
-end
-notes_dev_reload()
+-- local function notes_dev_reload()
+--   vim.api.nvim_create_user_command('NotesReload', function()
+--     package.loaded.notes = nil
+--     require('notes').setup(notes_opts)
+--     vim.notify 'Reloaded notes'
+--   end, { desc = 'Reload the local notes plugin' })
+-- end
+-- notes_dev_reload()
