@@ -525,11 +525,33 @@ do
   pcall(require('telescope').load_extension, 'fzf')
   pcall(require('telescope').load_extension, 'ui-select')
 
+  -- Rank barrel files lower, so `Foo/Foo.tsx` beats `Foo/index.ts` when both match equally well.
+  -- Telescope sorters are "lower score is better" (and -1 means "filtered out"), so an index file
+  -- has to score this many times better than a sibling before it wins. Raise it to push them further down.
+  local INDEX_PENALTY = 2
+
+  local function is_index_file(path) return path:match '^index%.[^/]+$' ~= nil or path:match '/index%.[^/]+$' ~= nil end
+
+  -- Wraps the configured file sorter (fzf-native, when installed) with the penalty above.
+  -- Must build a fresh sorter per picker: each one owns C-side state that is freed on close.
+  local function index_penalty_sorter(opts)
+    local sorter = require('telescope.config').values.file_sorter(opts or {})
+    local score = sorter.scoring_function
+    sorter.scoring_function = function(self, prompt, line, entry, cb_add, cb_filter)
+      local result = score(self, prompt, line, entry, cb_add, cb_filter)
+      if prompt == '' or type(result) ~= 'number' or result < 0 or not is_index_file(line) then return result end
+      -- A perfect match scores 0, where multiplying is a no-op; nudge it above its non-index peers.
+      if result == 0 then return 1e-9 end
+      return result * INDEX_PENALTY
+    end
+    return sorter
+  end
+
   -- See `:help telescope.builtin`
   local builtin = require 'telescope.builtin'
   vim.keymap.set('n', '<leader>sh', builtin.help_tags, { desc = '[S]earch [H]elp' })
   vim.keymap.set('n', '<leader>sk', builtin.keymaps, { desc = '[S]earch [K]eymaps' })
-  vim.keymap.set('n', '<leader>sf', builtin.find_files, { desc = '[S]earch [F]iles' })
+  vim.keymap.set('n', '<leader>sf', function() builtin.find_files { sorter = index_penalty_sorter {} } end, { desc = '[S]earch [F]iles' })
   vim.keymap.set('n', '<leader>ss', builtin.builtin, { desc = '[S]earch [S]elect Telescope' })
   vim.keymap.set({ 'n', 'v' }, '<leader>sw', builtin.grep_string, { desc = '[S]earch current [W]ord' })
   vim.keymap.set('n', '<leader>sg', builtin.live_grep, { desc = '[S]earch by [G]rep' })
