@@ -15,6 +15,14 @@ vim.pack.add(plugins)
 
 vim.keymap.set('n', '\\', '<Cmd>Neotree reveal<CR>', { desc = 'NeoTree reveal', silent = true })
 
+-- Swap the tree between the left and right side of the window
+vim.keymap.set('n', '<leader>\\', function()
+  local state = require('neo-tree.sources.manager').get_state 'filesystem'
+  -- current_position is nil while the tree is closed, so fall back to the configured side
+  local current = state.current_position or state.window.position or 'right'
+  vim.cmd('Neotree ' .. (current == 'left' and 'right' or 'left') .. ' reveal')
+end, { desc = 'NeoTree swap side', silent = true })
+
 require('neo-tree').setup {
   window = {
     position = 'right',
