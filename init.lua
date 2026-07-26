@@ -222,6 +222,23 @@ do
   -- Reload the Neovim config (re-source init.lua) without restarting.
   vim.keymap.set('n', '<leader>R', '<cmd>source $MYVIMRC<CR>', { desc = '[R]eload config' })
 
+  -- Buffer management
+  vim.keymap.set('n', '<leader>bd', '<cmd>bdelete<CR>', { desc = '[B]uffer [D]elete (close current)' })
+  vim.keymap.set('n', '<leader>bo', function()
+    local current = vim.api.nvim_get_current_buf()
+    local skipped = 0
+    for _, buf in ipairs(vim.api.nvim_list_bufs()) do
+      if buf ~= current and vim.bo[buf].buflisted then
+        if vim.bo[buf].modified then
+          skipped = skipped + 1
+        else
+          vim.api.nvim_buf_delete(buf, {})
+        end
+      end
+    end
+    if skipped > 0 then vim.notify(string.format('Kept %d modified buffer(s)', skipped), vim.log.levels.WARN) end
+  end, { desc = '[B]uffer close [O]thers' })
+
   -- Exit terminal mode in the builtin terminal with a shortcut that is a bit easier
   -- for people to discover. Otherwise, you normally need to press <C-\><C-n>, which
   -- is not what someone will guess without a bit more experience.
@@ -396,6 +413,7 @@ do
     spec = {
       { '<leader>s', group = '[S]earch', mode = { 'n', 'v' } },
       { '<leader>t', group = '[T]oggle' },
+      { '<leader>b', group = '[B]uffer' },
       { '<leader>h', group = 'Git [H]unk', mode = { 'n', 'v' } }, -- Enable gitsigns recommended keymaps first
       { 'gr', group = 'LSP Actions', mode = { 'n' } },
     },

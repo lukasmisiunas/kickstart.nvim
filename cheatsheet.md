@@ -18,3 +18,8 @@ bullet, key in backticks, then a separator and the description.
 - `gO` — Document symbols (jump to symbol in file)
 - `<C-o>` — Jump back to previous location
 - `<C-i>` — Jump forward again
+
+## Buffers
+
+- `<leader>bd` — Close current buffer
+- `<leader>bo` — Close all buffers except the current one
