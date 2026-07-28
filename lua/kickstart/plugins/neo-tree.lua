@@ -28,6 +28,9 @@ require('neo-tree').setup {
     position = 'right',
   },
   filesystem = {
+    -- Don't let neo-tree hijack `nvim <dir>`. Plain netrw is a normal buffer, so
+    -- global keymaps like <leader>sf work without having to leave it first.
+    hijack_netrw_behavior = 'disabled',
     window = {
       mappings = {
         ['\\'] = 'close_window',
