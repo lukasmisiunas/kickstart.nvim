@@ -19,13 +19,13 @@ vim.keymap.set('n', '\\', '<Cmd>Neotree reveal<CR>', { desc = 'NeoTree reveal', 
 vim.keymap.set('n', '<leader>\\', function()
   local state = require('neo-tree.sources.manager').get_state 'filesystem'
   -- current_position is nil while the tree is closed, so fall back to the configured side
-  local current = state.current_position or state.window.position or 'right'
+  local current = state.current_position or state.window.position or 'left'
   vim.cmd('Neotree ' .. (current == 'left' and 'right' or 'left') .. ' reveal')
 end, { desc = 'NeoTree swap side', silent = true })
 
 require('neo-tree').setup {
   window = {
-    position = 'right',
+    position = 'left',
   },
   filesystem = {
     -- Don't let neo-tree hijack `nvim <dir>`. Plain netrw is a normal buffer, so

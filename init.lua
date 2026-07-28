@@ -239,16 +239,16 @@ do
     if skipped > 0 then vim.notify(string.format('Kept %d modified buffer(s)', skipped), vim.log.levels.WARN) end
   end, { desc = '[B]uffer close [O]thers' })
 
-  -- Toggle a reusable terminal in a bottom split. The shell keeps running when
+  -- Toggle a reusable terminal in a right-hand split. The shell keeps running when
   -- hidden, so toggling back returns to the same session and scrollback.
-  local terminal = { buf = nil, height = 15, prev_win = nil }
+  local terminal = { buf = nil, width = 80, prev_win = nil }
   vim.keymap.set({ 'n', 't' }, '<leader>tt', function()
-    -- Visible? Remember its height and hide it, returning focus to the window we
+    -- Visible? Remember its width and hide it, returning focus to the window we
     -- came from (otherwise Neovim picks an arbitrary one, usually top-left).
     if terminal.buf and vim.api.nvim_buf_is_valid(terminal.buf) then
       local win = vim.fn.bufwinid(terminal.buf)
       if win ~= -1 then
-        terminal.height = vim.api.nvim_win_get_height(win)
+        terminal.width = vim.api.nvim_win_get_width(win)
         -- Toggled from elsewhere? Stay where we are instead.
         local restore = vim.api.nvim_get_current_win()
         if restore == win then restore = terminal.prev_win end
@@ -259,7 +259,7 @@ do
     end
 
     terminal.prev_win = vim.api.nvim_get_current_win()
-    vim.cmd('botright ' .. terminal.height .. 'split')
+    vim.cmd('botright ' .. terminal.width .. 'vsplit')
     if terminal.buf and vim.api.nvim_buf_is_valid(terminal.buf) then
       vim.api.nvim_win_set_buf(0, terminal.buf)
     else
