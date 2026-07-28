@@ -24,7 +24,17 @@ bullet, key in backticks, then a separator and the description.
 - `<leader>bd` — Close current buffer
 - `<leader>bo` — Close all buffers except the current one
 
+## Splits
+
+- `<C-w>>` — Widen the current split (takes a count, e.g. `10<C-w>>`)
+- `<C-w><` — Narrow the current split
+- `<C-w>+` — Make the current split taller
+- `<C-w>-` — Make the current split shorter
+- `<C-w>=` — Even out all split sizes
+- `<C-w>|` — Maximise the current split's width
+- `<C-w>_` — Maximise the current split's height
+
 ## Terminal
 
-- `<leader>tt` — Toggle terminal in a bottom split (keeps the session alive)
+- `<leader>tt` — Toggle terminal in a right-hand split (keeps the session alive)
 - `<Esc><Esc>` — Leave terminal mode (back to normal mode)
