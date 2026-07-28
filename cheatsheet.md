@@ -23,3 +23,8 @@ bullet, key in backticks, then a separator and the description.
 
 - `<leader>bd` — Close current buffer
 - `<leader>bo` — Close all buffers except the current one
+
+## Terminal
+
+- `<leader>tt` — Toggle terminal in a bottom split (keeps the session alive)
+- `<Esc><Esc>` — Leave terminal mode (back to normal mode)

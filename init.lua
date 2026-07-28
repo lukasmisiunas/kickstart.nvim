@@ -239,6 +239,37 @@ do
     if skipped > 0 then vim.notify(string.format('Kept %d modified buffer(s)', skipped), vim.log.levels.WARN) end
   end, { desc = '[B]uffer close [O]thers' })
 
+  -- Toggle a reusable terminal in a bottom split. The shell keeps running when
+  -- hidden, so toggling back returns to the same session and scrollback.
+  local terminal = { buf = nil, height = 15, prev_win = nil }
+  vim.keymap.set({ 'n', 't' }, '<leader>tt', function()
+    -- Visible? Remember its height and hide it, returning focus to the window we
+    -- came from (otherwise Neovim picks an arbitrary one, usually top-left).
+    if terminal.buf and vim.api.nvim_buf_is_valid(terminal.buf) then
+      local win = vim.fn.bufwinid(terminal.buf)
+      if win ~= -1 then
+        terminal.height = vim.api.nvim_win_get_height(win)
+        -- Toggled from elsewhere? Stay where we are instead.
+        local restore = vim.api.nvim_get_current_win()
+        if restore == win then restore = terminal.prev_win end
+        vim.api.nvim_win_hide(win)
+        if restore and restore ~= win and vim.api.nvim_win_is_valid(restore) then vim.api.nvim_set_current_win(restore) end
+        return
+      end
+    end
+
+    terminal.prev_win = vim.api.nvim_get_current_win()
+    vim.cmd('botright ' .. terminal.height .. 'split')
+    if terminal.buf and vim.api.nvim_buf_is_valid(terminal.buf) then
+      vim.api.nvim_win_set_buf(0, terminal.buf)
+    else
+      vim.cmd.terminal()
+      terminal.buf = vim.api.nvim_get_current_buf()
+      vim.bo[terminal.buf].buflisted = false
+    end
+    vim.cmd.startinsert()
+  end, { desc = '[T]oggle [T]erminal' })
+
   -- Exit terminal mode in the builtin terminal with a shortcut that is a bit easier
   -- for people to discover. Otherwise, you normally need to press <C-\><C-n>, which
   -- is not what someone will guess without a bit more experience.
