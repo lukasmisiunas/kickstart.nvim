@@ -27,6 +27,31 @@ require('neo-tree').setup {
   window = {
     position = 'left',
   },
+  -- Neo-tree runs `git status --ignored=traditional`, which makes git descend into
+  -- ignored directories instead of stopping at the pattern that ignores them. In a
+  -- repo with node_modules that means walking ~1.2M files: measured 50s for
+  -- `:Neotree git_status` (26s in git + 24s parsing the result into a table), all of
+  -- it blocking, since that source calls git synchronously. `--ignored=matching`
+  -- collapses ignored directories into one entry -- same repo drops to 0.14s.
+  -- hide_gitignored still works: neo-tree resolves a path's status by walking up to
+  -- its parents, so files under a `!` directory are still treated as ignored.
+  event_handlers = {
+    {
+      event = 'before_git_status',
+      handler = function(args)
+        -- git rejects `--ignored=matching` together with `--untracked-files=no`, which is
+        -- what neo-tree uses for its fast first pass over a new worktree. That pass doesn't
+        -- need the ignored list anyway (it comes from a separate `git ls-files` job), so
+        -- drop ignored entirely there.
+        local skip_untracked = vim.tbl_contains(args.status_args, '--untracked-files=no')
+        for i, arg in ipairs(args.status_args) do
+          if arg:match '^%-%-ignored=' then
+            args.status_args[i] = skip_untracked and '--ignored=no' or '--ignored=matching'
+          end
+        end
+      end,
+    },
+  },
   filesystem = {
     -- Don't let neo-tree hijack `nvim <dir>`. Plain netrw is a normal buffer, so
     -- global keymaps like <leader>sf work without having to leave it first.
