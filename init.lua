@@ -239,16 +239,37 @@ do
     if skipped > 0 then vim.notify(string.format('Kept %d modified buffer(s)', skipped), vim.log.levels.WARN) end
   end, { desc = '[B]uffer close [O]thers' })
 
-  -- Toggle a reusable terminal in a right-hand split. The shell keeps running when
-  -- hidden, so toggling back returns to the same session and scrollback.
-  local terminal = { buf = nil, width = 80, prev_win = nil }
-  vim.keymap.set({ 'n', 't' }, '<leader>tt', function()
-    -- Visible? Remember its width and hide it, returning focus to the window we
-    -- came from (otherwise Neovim picks an arbitrary one, usually top-left).
+  -- Toggle a reusable terminal in a centred floating window. The shell keeps
+  -- running when hidden, so toggling back returns to the same session and
+  -- scrollback. Mapped to <C-\> rather than a <leader> sequence: a leader map in
+  -- terminal mode makes every <Space> wait for the timeout before it reaches the
+  -- shell, which is very noticeable while typing.
+  local terminal = { buf = nil, prev_win = nil }
+  local function terminal_float_config()
+    -- `lines` counts rows the float cannot use: the command line and, with a
+    -- global statusline, the status row. Centring against the raw value pushes
+    -- the window down, so measure the space a float actually gets. The border
+    -- costs a row and a column on each side, hence the -2s.
+    local rows = vim.o.lines - vim.o.cmdheight - (vim.o.laststatus == 3 and 1 or 0)
+    local width = math.floor(vim.o.columns * 0.9) - 2
+    local height = math.floor(rows * 0.9) - 2
+    return {
+      relative = 'editor',
+      width = width,
+      height = height,
+      row = math.floor((rows - height - 2) / 2),
+      col = math.floor((vim.o.columns - width - 2) / 2),
+      style = 'minimal',
+      border = 'rounded',
+    }
+  end
+
+  vim.keymap.set({ 'n', 't' }, '<C-\\>', function()
+    -- Visible? Hide it, returning focus to the window we came from (otherwise
+    -- Neovim picks an arbitrary one, usually top-left).
     if terminal.buf and vim.api.nvim_buf_is_valid(terminal.buf) then
       local win = vim.fn.bufwinid(terminal.buf)
       if win ~= -1 then
-        terminal.width = vim.api.nvim_win_get_width(win)
         -- Toggled from elsewhere? Stay where we are instead.
         local restore = vim.api.nvim_get_current_win()
         if restore == win then restore = terminal.prev_win end
@@ -259,16 +280,26 @@ do
     end
 
     terminal.prev_win = vim.api.nvim_get_current_win()
-    vim.cmd('botright ' .. terminal.width .. 'vsplit')
-    if terminal.buf and vim.api.nvim_buf_is_valid(terminal.buf) then
-      vim.api.nvim_win_set_buf(0, terminal.buf)
-    else
-      vim.cmd.terminal()
-      terminal.buf = vim.api.nvim_get_current_buf()
-      vim.bo[terminal.buf].buflisted = false
+    if not (terminal.buf and vim.api.nvim_buf_is_valid(terminal.buf)) then
+      terminal.buf = vim.api.nvim_create_buf(false, true)
     end
+    vim.api.nvim_open_win(terminal.buf, true, terminal_float_config())
+    -- `termopen` only applies to an empty buffer, so start the shell the first
+    -- time the buffer is shown in a window (it needs one to size the pty).
+    if vim.bo[terminal.buf].buftype ~= 'terminal' then vim.fn.jobstart(vim.o.shell, { term = true }) end
     vim.cmd.startinsert()
-  end, { desc = '[T]oggle [T]erminal' })
+  end, { desc = 'Toggle floating terminal' })
+
+  -- Keep the float ~90% of the editor when the outer window is resized.
+  vim.api.nvim_create_autocmd('VimResized', {
+    desc = 'Resize the floating terminal with the editor',
+    group = vim.api.nvim_create_augroup('floating-terminal-resize', { clear = true }),
+    callback = function()
+      if not (terminal.buf and vim.api.nvim_buf_is_valid(terminal.buf)) then return end
+      local win = vim.fn.bufwinid(terminal.buf)
+      if win ~= -1 then vim.api.nvim_win_set_config(win, terminal_float_config()) end
+    end,
+  })
 
   -- Exit terminal mode in the builtin terminal with a shortcut that is a bit easier
   -- for people to discover. Otherwise, you normally need to press <C-\><C-n>, which

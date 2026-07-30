@@ -36,5 +36,5 @@ bullet, key in backticks, then a separator and the description.
 
 ## Terminal
 
-- `<leader>tt` — Toggle terminal in a right-hand split (keeps the session alive)
+- `<C-\>` — Toggle terminal in a floating window (keeps the session alive)
 - `<Esc><Esc>` — Leave terminal mode (back to normal mode)
