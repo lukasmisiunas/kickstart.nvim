@@ -23,10 +23,9 @@ vim.keymap.set('n', '<leader>\\', function()
   vim.cmd('Neotree ' .. (current == 'left' and 'right' or 'left') .. ' reveal')
 end, { desc = 'NeoTree swap side', silent = true })
 
--- Tree of just the files changed vs HEAD. `toggle` rather than `reveal` because the
--- git_status window has no `\` close mapping the way the filesystem one does, so this
--- key is the only way back out.
-vim.keymap.set('n', '<leader>gt', '<Cmd>Neotree toggle git_status<CR>', { desc = 'NeoTree [G]it [T]ree', silent = true })
+-- NOTE: `:Neotree git_status` (a tree of just the files changed vs HEAD) no longer has
+-- a keymap -- diffview's file panel covers the same ground next to the actual diff.
+-- The event handler below still matters, since the command itself remains.
 
 require('neo-tree').setup {
   window = {

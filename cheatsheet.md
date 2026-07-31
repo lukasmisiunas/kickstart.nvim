@@ -38,3 +38,20 @@ bullet, key in backticks, then a separator and the description.
 
 - `<C-\>` — Toggle terminal in a floating window (keeps the session alive)
 - `<Esc><Esc>` — Leave terminal mode (back to normal mode)
+
+## Git
+
+- `<leader>hd` — Toggle the diff view of the working tree
+- `<leader>hD` — Diff against a revision (prompts, defaults to the base branch)
+- `<leader>hh` — History of the current file, commit by commit
+- `<leader>hH` — History of the whole repo
+- `<leader>gs` — Changed files (Telescope)
+- `<leader>gc` — Commits (Telescope)
+
+### Inside the diff view
+
+- `<Tab>` / `<S-Tab>` — Next / previous changed file
+- `<leader>hf` — Toggle the file panel
+- `g<C-x>` — Cycle through the layouts (side-by-side, stacked, …)
+- `-` — Stage or unstage the file under the cursor (file panel)
+- `X` — Restore the file under the cursor to its state on the left side
