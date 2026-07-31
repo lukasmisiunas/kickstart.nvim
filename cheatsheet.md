@@ -23,6 +23,8 @@ bullet, key in backticks, then a separator and the description.
 
 - `<leader>bd` — Close current buffer
 - `<leader>bo` — Close all buffers except the current one
+- `:e!` — Discard unsaved changes, reloading the file from disk
+- `:earlier 1f` — Undo back to the last save (`:later 1f` to come back)
 
 ## Splits
 
