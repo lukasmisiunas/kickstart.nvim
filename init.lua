@@ -499,6 +499,18 @@ do
   require('dracula').setup {
     italic_comment = false,
     transparent_bg = true,
+    -- Dracula paints diffs with its full-saturation palette colors as
+    -- backgrounds, which is blinding over a whole side-by-side diff and hides
+    -- syntax highlighting behind an opaque foreground. Use the same hues mixed
+    -- down into the background instead, and leave fg alone so treesitter colors
+    -- still show through. Diffview reads these same groups -- it derives its
+    -- deleted-line highlight from DiffDelete.
+    overrides = {
+      DiffAdd = { bg = '#243a2b', fg = 'NONE' }, -- added lines
+      DiffDelete = { bg = '#3d2530', fg = 'NONE' }, -- removed lines
+      DiffChange = { bg = '#2b3247', fg = 'NONE' }, -- lines containing a change
+      DiffText = { bg = '#40506e', fg = 'NONE' }, -- the changed region within them
+    },
   }
 
   vim.cmd.colorscheme 'dracula'
