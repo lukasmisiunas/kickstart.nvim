@@ -602,6 +602,22 @@ do
   -- NOTE: You can install multiple plugins at once
   vim.pack.add(telescope_plugins)
 
+  -- Dot-prefixed paths are ordinary project files (`.github/`, `.stylua.toml`, `.env.example`),
+  -- so don't hide them -- let `.gitignore` say what counts as noise instead. Both `fd`
+  -- (find_files) and `rg` (live_grep/grep_string) already honor it; they only need `--hidden`
+  -- to stop skipping dotfiles. Neither counts `.git` as ignored though, so it has to be excluded
+  -- by hand, or `--hidden` drags in every loose object and ref. Outside a git repo there is no
+  -- `.gitignore` to consult and everything shows up, which is the same rule seen from the outside.
+  local find_command
+  if vim.fn.executable 'fd' == 1 then
+    find_command = { 'fd', '--type', 'f', '--color', 'never', '--exclude', '.git' }
+  elseif vim.fn.executable 'rg' == 1 then
+    find_command = { 'rg', '--files', '--color', 'never', '--glob', '!**/.git/*' }
+  end
+
+  local vimgrep_arguments = vim.deepcopy(require('telescope.config').values.vimgrep_arguments)
+  vim.list_extend(vimgrep_arguments, { '--hidden', '--glob', '!**/.git/*' })
+
   -- See `:help telescope` and `:help telescope.setup()`
   require('telescope').setup {
     -- You can put your default mappings / updates / etc. in here
@@ -612,7 +628,14 @@ do
     --     i = { ['<c-enter>'] = 'to_fuzzy_refine' },
     --   },
     -- },
-    -- pickers = {}
+    defaults = {
+      vimgrep_arguments = vimgrep_arguments,
+    },
+    pickers = {
+      -- `hidden` is telescope's own flag for "pass --hidden"; it also drops the dotfile
+      -- filter from the plain `find` fallback used when neither fd nor rg is installed.
+      find_files = { hidden = true, find_command = find_command },
+    },
     extensions = {
       ['ui-select'] = { require('telescope.themes').get_dropdown() },
     },

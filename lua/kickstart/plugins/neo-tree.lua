@@ -60,6 +60,18 @@ require('neo-tree').setup {
     -- Don't let neo-tree hijack `nvim <dir>`. Plain netrw is a normal buffer, so
     -- global keymaps like <leader>sf work without having to leave it first.
     hijack_netrw_behavior = 'disabled',
+    filtered_items = {
+      -- A leading dot doesn't mean "not my file" -- `.github/`, `.stylua.toml` and friends
+      -- are as much part of the project as anything else. `.gitignore` is the list of what
+      -- actually deserves hiding, and hide_gitignored (on by default) already applies it.
+      hide_dotfiles = false,
+      -- `.git` is never in `.gitignore`, so without hide_dotfiles it needs naming here.
+      -- Setting this replaces neo-tree's default list, hence the other two.
+      hide_by_name = { '.git', '.DS_Store', 'thumbs.db' },
+    },
+    -- The in-tree filter (`/`) shells out to `fd`, which gets `--hidden` now that dotfiles
+    -- are visible; keep it out of `.git` for the same reason as above.
+    find_args = { fd = { '--exclude', '.git' } },
     window = {
       mappings = {
         ['\\'] = 'close_window',

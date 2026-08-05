@@ -36,6 +36,10 @@ bullet, key in backticks, then a separator and the description.
 - `<C-w>|` — Maximise the current split's width
 - `<C-w>_` — Maximise the current split's height
 
+## Files
+
+- `H` — Reveal hidden entries in neo-tree: what `.gitignore` covers, plus `.git`
+
 ## Terminal
 
 - `<C-\>` — Toggle terminal in a floating window (keeps the session alive)
