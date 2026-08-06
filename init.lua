@@ -178,6 +178,13 @@ do
   -- Minimal number of screen lines to keep above and below the cursor.
   vim.o.scrolloff = 10
 
+  -- Default border for floating windows that don't ask for one themselves --
+  -- LSP hover/signature help, gitsigns' blame and hunk previews, blink.cmp's
+  -- menu and docs, mini's floats. Floats that pass an explicit `border` (the
+  -- diagnostic float, the terminal below, notes) keep their own setting.
+  -- See `:help 'winborder'`
+  vim.o.winborder = 'rounded'
+
   -- Don't auto-open folds when jumping with block motions (`{`, `}`, `(`, `)`, `[[`, `]]`)
   -- See `:help 'foldopen'`
   vim.opt.foldopen:remove 'block'
@@ -506,6 +513,15 @@ do
     -- still show through. Diffview reads these same groups -- it derives its
     -- deleted-line highlight from DiffDelete.
     overrides = {
+      -- `transparent_bg` drops Normal's background so the terminal shows
+      -- through, but floats keep dracula's `bg` -- which is what the terminal
+      -- is painted with too, so hovers read as text floating over the buffer.
+      -- Sink them to the darker `menu` shade and colour the border so they
+      -- read as a distinct surface.
+      NormalFloat = { fg = '#F8F8F2', bg = '#21222C' },
+      FloatBorder = { fg = '#6272A4', bg = '#21222C' },
+      FloatTitle = { fg = '#BD93F9', bg = '#21222C' },
+
       DiffAdd = { bg = '#243a2b', fg = 'NONE' }, -- added lines
       DiffDelete = { bg = '#3d2530', fg = 'NONE' }, -- removed lines
       DiffChange = { bg = '#2b3247', fg = 'NONE' }, -- lines containing a change
