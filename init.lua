@@ -230,6 +230,19 @@ do
   -- Apply all auto-fixable ESLint issues in the current buffer.
   vim.keymap.set('n', '<leader>cf', '<cmd>LspEslintFixAll<CR>', { desc = '[C]ode [F]ix (ESLint)' })
 
+  -- Restart the language servers attached to this buffer. Bare `:LspRestart`
+  -- restarts every client in the session; ts_ls is the one that usually needs
+  -- it, after a branch switch or an install leaves it out of sync.
+  vim.keymap.set('n', '<leader>cr', function()
+    local names = vim.tbl_map(function(client) return client.name end, vim.lsp.get_clients { bufnr = 0 })
+    if vim.tbl_isempty(names) then
+      vim.notify('No language server attached to this buffer', vim.log.levels.WARN)
+      return
+    end
+    vim.cmd('LspRestart ' .. table.concat(names, ' '))
+    vim.notify('Restarting ' .. table.concat(names, ', '))
+  end, { desc = '[C]ode [R]estart (LSP)' })
+
   -- Reload the Neovim config (re-source init.lua) without restarting.
   vim.keymap.set('n', '<leader>R', '<cmd>source $MYVIMRC<CR>', { desc = '[R]eload config' })
 
@@ -487,6 +500,7 @@ do
       { '<leader>s', group = '[S]earch', mode = { 'n', 'v' } },
       { '<leader>t', group = '[T]oggle' },
       { '<leader>b', group = '[B]uffer' },
+      { '<leader>c', group = '[C]ode' },
       { '<leader>g', group = '[G]it' },
       { '<leader>h', group = 'Git [H]unks, diffs, history', mode = { 'n', 'v' } }, -- Enable gitsigns recommended keymaps first
       { 'gr', group = 'LSP Actions', mode = { 'n' } },

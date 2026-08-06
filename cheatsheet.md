@@ -40,6 +40,10 @@ bullet, key in backticks, then a separator and the description.
 
 - `H` — Reveal hidden entries in neo-tree: what `.gitignore` covers, plus `.git`
 
+## Code
+
+- `<leader>cr` — Restart the language servers attached to this buffer (tsserver drifting after a branch switch)
+
 ## Terminal
 
 - `<C-\>` — Toggle terminal in a floating window (keeps the session alive)
