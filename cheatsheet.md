@@ -40,6 +40,13 @@ bullet, key in backticks, then a separator and the description.
 
 - `H` — Reveal hidden entries in neo-tree: what `.gitignore` covers, plus `.git`
 
+## Search
+
+- `<leader>sf` — Find files; the prompt takes fzf syntax: `!test` excludes, `'exact`, `^src`, `.tsx$`, `go$ | rb$`
+- `<leader>sg` — Live grep; here the prompt is an `rg` pattern, so those tokens match literally
+- `<C-Space>` — Freeze the live grep results into a fuzzy list, where the tokens above work (`<C-Enter>` too, in terminals that can send it)
+- `.ignore` — A file at the project root that both `fd` and `rg` honor: keeps paths out of every picker without touching `.gitignore`
+
 ## Code
 
 - `<leader>cr` — Restart the language servers attached to this buffer (tsserver drifting after a branch switch)

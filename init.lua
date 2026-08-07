@@ -652,14 +652,20 @@ do
   require('telescope').setup {
     -- You can put your default mappings / updates / etc. in here
     --  All the info you're looking for is in `:help telescope.setup()`
-    --
-    -- defaults = {
-    --   mappings = {
-    --     i = { ['<c-enter>'] = 'to_fuzzy_refine' },
-    --   },
-    -- },
     defaults = {
       vimgrep_arguments = vimgrep_arguments,
+      mappings = {
+        -- `live_grep` hands the prompt to `rg`, so fzf syntax (`!test` to exclude, `.tsx$` to
+        -- anchor) does nothing there. `to_fuzzy_refine` freezes the current results into a static
+        -- list re-sorted by the generic sorter -- fzf-native -- so the whole syntax works from
+        -- that point on. Bound twice because `<C-Enter>` only reaches Neovim from terminals that
+        -- speak the kitty keyboard protocol; where it doesn't, it arrives as a plain `<CR>` and
+        -- opens the entry instead, and `<C-Space>` is the one that works.
+        i = {
+          ['<c-enter>'] = 'to_fuzzy_refine',
+          ['<c-space>'] = 'to_fuzzy_refine',
+        },
+      },
     },
     pickers = {
       -- `hidden` is telescope's own flag for "pass --hidden"; it also drops the dotfile
