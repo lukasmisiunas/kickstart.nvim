@@ -5,9 +5,11 @@ bullet, key in backticks, then a separator and the description.
 
 ## Navigation
 
-- `%` — Jump to matching bracket
+- `f)` — Jump to the next `)` on the line, matched or not (`;` repeats, `,` reverses)
+- `t)` — Same, but stop just before it
+- `%` — Jump to matching bracket; with no bracket under the cursor it scans forward on the line for one first, so it also lands on the `)` of `onClose()`
 - `[(` — Jump to previous unmatched `(`
-- `])` — Jump to next unmatched `)`
+- `])` — Jump to next unmatched `)`; this is for jumping *out* of the parens you are inside, so it skips pairs that are already closed
 - `[{` — Jump to previous unmatched `{`
 - `]}` — Jump to next unmatched `}`
 - `}` — Jump to next blank line (paragraph forward)
@@ -50,6 +52,17 @@ bullet, key in backticks, then a separator and the description.
 ## Code
 
 - `<leader>cr` — Restart the language servers attached to this buffer (tsserver drifting after a branch switch)
+
+## Macros
+
+- `qa` — Start recording into register `a` (any letter works)
+- `q` — Stop recording
+- `@a` — Run the macro in register `a`
+- `@@` — Run the last macro again
+- `10@a` — Run it 10 times; it stops early on the first error, e.g. when a `f)` finds nothing
+- `qA` — Append to register `a` instead of overwriting it
+- `:'<,'>normal @a` — Run the macro once per line over a visual selection
+- `"ap` — Paste the macro out as text to edit it, then `"ay$` to yank the fixed line back into `a`
 
 ## Terminal
 
