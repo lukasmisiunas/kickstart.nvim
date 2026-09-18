@@ -945,12 +945,10 @@ do
     eslint = {},
     astro = {}, -- Astro LSP (.astro files)
 
-    stylua = {}, -- Used to format Lua code
-
     -- Special Lua Config, as recommended by neovim help docs
     lua_ls = {
       on_init = function(client)
-        client.server_capabilities.documentFormattingProvider = false -- Disable formatting (formatting is done by stylua)
+        client.server_capabilities.documentFormattingProvider = false -- Disable formatting (conform runs stylua instead)
 
         if client.workspace_folders then
           local path = client.workspace_folders[1].name
@@ -976,7 +974,7 @@ do
       ---@type lspconfig.settings.lua_ls
       settings = {
         Lua = {
-          format = { enable = false }, -- Disable formatting (formatting is done by stylua)
+          format = { enable = false }, -- Disable formatting (conform runs stylua instead)
         },
       },
     },
@@ -1006,6 +1004,7 @@ do
   vim.list_extend(ensure_installed, {
     -- You can add other tools here that you want Mason to install
     'prettierd',
+    'stylua', -- Formats Lua; driven by conform, not run as a language server
     { 'astro-language-server', version = '2.16.10' },
   })
 
@@ -1048,6 +1047,7 @@ do
     },
     -- You can also specify external formatters in here.
     formatters_by_ft = {
+      lua = { 'stylua' },
       rust = { 'rustfmt' },
       -- Conform can also run multiple formatters sequentially
       -- python = { "isort", "black" },
