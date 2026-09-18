@@ -30,6 +30,12 @@ end, { desc = 'NeoTree swap side', silent = true })
 require('neo-tree').setup {
   window = {
     position = 'left',
+    mappings = {
+      -- neo-tree's own `y` is its internal copy-a-file clipboard, so the system
+      -- clipboard needs a key of its own. `Y` is free in every source.
+      ['Y'] = function() vim.cmd.YankPath() end,
+      ['gY'] = function() vim.cmd.YankPath { bang = true } end,
+    },
   },
   -- Neo-tree runs `git status --ignored=traditional`, which makes git descend into
   -- ignored directories instead of stopping at the pattern that ignores them. In a

@@ -41,6 +41,9 @@ bullet, key in backticks, then a separator and the description.
 ## Files
 
 - `H` — Reveal hidden entries in neo-tree: what `.gitignore` covers, plus `.git`
+- `<leader>yp` — Copy the current file's path to the clipboard, relative to the cwd (works on the node under the cursor in neo-tree too)
+- `<leader>yP` — Same, but the absolute path
+- `Y` / `gY` — In neo-tree, copy the highlighted path (relative / absolute); its own `y` is the internal copy-a-file clipboard
 
 ## Search
 

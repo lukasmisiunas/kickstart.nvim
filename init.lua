@@ -263,6 +263,46 @@ do
     if skipped > 0 then vim.notify(string.format('Kept %d modified buffer(s)', skipped), vim.log.levels.WARN) end
   end, { desc = '[B]uffer close [O]thers' })
 
+  -- Copy the current file's path to the clipboard. In a neo-tree window `%` is
+  -- the tree buffer, not a file, so resolve the node under the cursor instead --
+  -- that way the same keys work whether the file is open or just highlighted in
+  -- the tree. get_state_for_window covers every source, not just filesystem.
+  local function path_under_cursor()
+    if vim.bo.filetype == 'neo-tree' then
+      local ok, manager = pcall(require, 'neo-tree.sources.manager')
+      if not ok then return nil end
+      local state = manager.get_state_for_window(vim.api.nvim_get_current_win())
+      local node = state and state.tree and state.tree:get_node()
+      return node and node.path
+    end
+    local name = vim.api.nvim_buf_get_name(0)
+    return name ~= '' and name or nil
+  end
+
+  local function yank_path(absolute)
+    local path = path_under_cursor()
+    if not path then
+      vim.notify('No file path here', vim.log.levels.WARN)
+      return
+    end
+    -- `:.` is relative to the cwd, and falls back to the absolute path for
+    -- anything outside it. fnamemodify needs a full path to shorten, which the
+    -- tree gives us already and `%` may not.
+    path = vim.fn.fnamemodify(path, absolute and ':p' or ':p:.')
+    vim.fn.setreg('+', path)
+    vim.notify('Copied ' .. path)
+  end
+
+  vim.keymap.set('n', '<leader>yp', function() yank_path(false) end, { desc = '[Y]ank [P]ath (relative)' })
+  vim.keymap.set('n', '<leader>yP', function() yank_path(true) end, { desc = '[Y]ank [P]ath (absolute)' })
+
+  -- Also a command, so neo-tree's own mapping can reach it (its mappings run in
+  -- the tree window, which is all yank_path needs) and for one-off `:YankPath!`.
+  vim.api.nvim_create_user_command('YankPath', function(opts) yank_path(opts.bang) end, {
+    bang = true,
+    desc = 'Copy the current path to the clipboard (! for absolute)',
+  })
+
   -- Toggle a reusable terminal in a centred floating window. The shell keeps
   -- running when hidden, so toggling back returns to the same session and
   -- scrollback. Mapped to <C-\> rather than a <leader> sequence: a leader map in
@@ -501,6 +541,7 @@ do
       { '<leader>t', group = '[T]oggle' },
       { '<leader>b', group = '[B]uffer' },
       { '<leader>c', group = '[C]ode' },
+      { '<leader>y', group = '[Y]ank path' },
       { '<leader>g', group = '[G]it' },
       { '<leader>h', group = 'Git [H]unks, diffs, history', mode = { 'n', 'v' } }, -- Enable gitsigns recommended keymaps first
       { 'gr', group = 'LSP Actions', mode = { 'n' } },
