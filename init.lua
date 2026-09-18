@@ -230,16 +230,18 @@ do
   -- Apply all auto-fixable ESLint issues in the current buffer.
   vim.keymap.set('n', '<leader>cf', '<cmd>LspEslintFixAll<CR>', { desc = '[C]ode [F]ix (ESLint)' })
 
-  -- Restart the language servers attached to this buffer. Bare `:LspRestart`
-  -- restarts every client in the session; ts_ls is the one that usually needs
-  -- it, after a branch switch or an install leaves it out of sync.
+  -- Restart the language servers attached to this buffer -- ts_ls is the one that
+  -- usually needs it, after a branch switch or an install leaves it out of sync.
+  -- Nvim 0.12 ships `:lsp restart`, which restarts the current buffer's clients
+  -- and reattaches them; nvim-lspconfig sees the built-in and no longer defines
+  -- its own `:LspRestart`, so don't reach for that name.
   vim.keymap.set('n', '<leader>cr', function()
     local names = vim.tbl_map(function(client) return client.name end, vim.lsp.get_clients { bufnr = 0 })
     if vim.tbl_isempty(names) then
       vim.notify('No language server attached to this buffer', vim.log.levels.WARN)
       return
     end
-    vim.cmd('LspRestart ' .. table.concat(names, ' '))
+    vim.cmd 'lsp restart'
     vim.notify('Restarting ' .. table.concat(names, ', '))
   end, { desc = '[C]ode [R]estart (LSP)' })
 
