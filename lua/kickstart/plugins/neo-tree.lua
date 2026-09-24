@@ -31,8 +31,21 @@ require('neo-tree').setup {
   window = {
     position = 'left',
     mappings = {
-      -- neo-tree's own `y` is its internal copy-a-file clipboard, so the system
-      -- clipboard needs a key of its own. `Y` is free in every source.
+      -- neo-tree's own `y` is its internal copy-a-file clipboard (paired with `p`),
+      -- whose "Copied to clipboard" message reads like a system yank but isn't.
+      -- Take it over for the file name; `c` still copies a file, with a prompt.
+      -- Basename of the path rather than node.name, which on a source's root
+      -- node is a display label.
+      ['y'] = function(state)
+        local node = state.tree:get_node()
+        if not (node and node.path) then
+          vim.notify('No file path here', vim.log.levels.WARN)
+          return
+        end
+        local name = vim.fs.basename(node.path)
+        vim.fn.setreg('+', name)
+        vim.notify('Copied ' .. name)
+      end,
       ['Y'] = function() vim.cmd.YankPath() end,
       ['gY'] = function() vim.cmd.YankPath { bang = true } end,
     },
